@@ -24,7 +24,6 @@ public class Owner extends User {
     public String getArrivalTime()  { return arrivalTime; }
     public String getDepartureTime(){ return departureTime; }
 
-   
     public String fileText() {
         return "Owner ID: " + ID +
                " | Timestamp: " + time +
@@ -32,8 +31,7 @@ public class Owner extends User {
                " | Vehicle Model: " + vehicleModel +
                " | Vehicle Make: " + vehicleMake +
                " | Vehicle Year: " + vehicleYear +
-               " | Arrival Time: " + arrivalTime +
-               " | Departure Time: " + departureTime;
+               " | Arrival Time: " + arrivalTime + " hr/min" +
+               " | Departure Time: " + departureTime + " hr/min";
     }
 }
-
