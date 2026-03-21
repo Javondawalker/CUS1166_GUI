@@ -1,10 +1,13 @@
 import java.util.*;
 
-public class VCController {
+public class VCController extends User {
 	private Queue<Job> jobs = new LinkedList<>();
 	
 	public void assignJob(Job job) {
 		jobs.add(job);
+	}
+	public VCController(String VCID) {
+		super(VCID);
 	}
 	
 	public String completion() {
@@ -12,12 +15,18 @@ public class VCController {
 		StringBuilder x = new StringBuilder();
 		
 		for(Job job : jobs) {
-			time+= job.getDuration();
+			time+= job.getDurationMinutes();
 			
-			x.append("Job ID: " + job.getJobID() + " | Duration: " + job.getDuration() +
+			x.append("Job ID: " + job.getJobID() + " | Duration: " + job.getDurationMinutes() +
 	                  " | Completion Time: " + time + "\n");
 	  
 		}
 		return x.toString();
 	}
+
+	@Override
+	public String fileText() {
+		return "VCController" + ID;
+	}
+	
 }
