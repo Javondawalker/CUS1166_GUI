@@ -1,15 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.List;
+import java.util.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
-import java.util.*;
+
 
 public class VehicleCloudFrame extends JFrame {
 
@@ -267,7 +267,7 @@ public class VehicleCloudFrame extends JFrame {
         controllerClearButton.addActionListener(e -> handleClear());
         clientClearButton.addActionListener(e -> handleClear());
 
-        computeCompletion.addActionListener(e -> handleComputation(null));
+        computeCompletion.addActionListener(e -> handleComputation(//file));
     }
 
     // Gianna: clear all fields
@@ -357,7 +357,7 @@ public class VehicleCloudFrame extends JFrame {
     private void handleComputation(File file){
     
     try(BufferedReader br = new BufferedReader(new FileReader(file))) {
-    	List<Job> jobs = new ArrayList<>();
+    	List <Job> jobs = new ArrayList<>();
         String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
