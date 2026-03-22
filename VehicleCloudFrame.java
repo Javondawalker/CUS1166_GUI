@@ -390,8 +390,7 @@ public class VehicleCloudFrame extends JFrame {
             vc.assignJob(j);
         } 
         LocalDateTime start = LocalDateTime.now();
-        String report = vc.completion(start);
-
+        String report = vc.completion();
         outputArea.setText("==== Starting at" + start + "====\n" + report);
            
             }catch (Exception e){
