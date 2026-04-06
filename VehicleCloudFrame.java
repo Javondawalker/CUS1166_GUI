@@ -115,33 +115,46 @@ public class VehicleCloudFrame extends JFrame {
         
         
         // Home Panel 
-        JPanel homePanel = new JPanel(null);
+        JPanel homePanel = new JPanel(new GridBagLayout());
         homePanel.setBackground(new Color(255, 220, 230));
 
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 3;
+        gbc.anchor = GridBagConstraints.CENTER;
+
         JLabel questionLabel = new JLabel("What type of user are you?");
-        questionLabel.setBounds(180, 60, 250, 100);
-        homePanel.add(questionLabel);
+        questionLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        homePanel.add(questionLabel, gbc);
 
         ownerButton = new JRadioButton("Owner");
-        ownerButton.setBounds(100, 110, 100, 180);
         ownerButton.setBackground(new Color(255, 220, 230));
 
         clientButton = new JRadioButton("Client");
-        clientButton.setBounds(220, 110, 100, 180);
         clientButton.setBackground(new Color(255, 220, 230));
-        
+
         controllerButton = new JRadioButton("Controller");
-        controllerButton.setBounds(320, 110, 100, 180);
-        controllerButton.setBackground(new Color(255,220,230));
+        controllerButton.setBackground(new Color(255, 220, 230));
 
         ButtonGroup group = new ButtonGroup();
         group.add(ownerButton);
         group.add(clientButton);
         group.add(controllerButton);
 
-        homePanel.add(ownerButton);
-        homePanel.add(clientButton);
-        homePanel.add(controllerButton);
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        gbc.gridx = 0;
+        homePanel.add(ownerButton, gbc);
+
+        gbc.gridx = 1;
+        homePanel.add(clientButton, gbc);
+
+        gbc.gridx = 2;
+        homePanel.add(controllerButton, gbc);
         
         // Controller Panel
         JPanel controllerPanel = new JPanel(new GridLayout(5, 1, 0, 5));
@@ -215,7 +228,7 @@ public class VehicleCloudFrame extends JFrame {
 
         add(cards, BorderLayout.CENTER);
         //make sure the welcome page shows first
-        cardLayout.show(cards, "welcome");
+        cardLayout.show(cards, "Welcome"); // FIX: was "welcome" (lowercase), CardLayout is case-sensitive
     }
 
     // Hawa: helper to build a labeled row
@@ -253,10 +266,6 @@ public class VehicleCloudFrame extends JFrame {
         ownerClearButton.addActionListener(e -> handleClear());
         clientClearButton.addActionListener(e -> handleClear());
 
-        // FIX: open a JFileChooser so the user can select the log file,
-        // then pass the chosen File to handleComputation.
-        // Previously this was: handleComputation(//file) — a syntax error
-        // with a dangling comment instead of an actual argument.
         computeCompletion.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Select the vehicular cloud log file");
@@ -280,10 +289,6 @@ public class VehicleCloudFrame extends JFrame {
         jobDurationField.setText("");
         jobDeadlineField.setText("");
     }
-
-
-
-  
 
     // Gianna: owner submit handler (EDITED & PATCHED BY MEHMET)
      private void handleOwnerSubmit() {
@@ -342,7 +347,6 @@ public class VehicleCloudFrame extends JFrame {
             }
 
             Client client = new Client(clientID, jobDurationMinutes, jobDeadline);
-            
 
             // milestone 5 - redirected data to socket in Client class by calling jobrequest, returns message based on response from server 
             String result = client.jobRequest("localhost", 5000);
@@ -361,62 +365,51 @@ public class VehicleCloudFrame extends JFrame {
                 "Invalid deadline format. Please use: yyyy-MM-ddTHH:mm\nExample: 2025-04-01T14:30");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Invalid input. Please check all fields.");
-
         }
     }
+
     private void handleComputation(File file){
-    
-    try(BufferedReader br = new BufferedReader(new FileReader(file))) {
-        List<Job> jobs= new ArrayList<>();
-        String line;
+        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+            List<Job> jobs= new ArrayList<>();
+            String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
                 if (!line.startsWith("Client ID:")) continue;
 
-                // Expected format (from Client.fileText()):
-                // Client ID: X | Timestamp: Y | Approx job duration (min): Z | Job deadline: W
-                
                 String[] parts = line.split("\\|");
                 if (parts.length < 4) {
                     throw new IllegalArgumentException("Invalid client line: " + line);
                 }
                  
                 String clientID = parts[0].split(":",2)[1].trim();
-                // parts[1] is "Timestamp: ..." — used as arrival time                String jobID = parts[1].trim().split(":", 2)[1].trim(); 
                 LocalDateTime arrival  = LocalDateTime.parse(parts[1].split(":", 2)[1].trim());
                 int duration           = Integer.parseInt(parts[2].split(":", 2)[1].trim());
                 LocalDateTime deadline = LocalDateTime.parse(parts[3].split(":", 2)[1].trim());
 
-                // Use clientID as jobID since the log has no separate job identifier
                 Job j = new Job(clientID, clientID, arrival, null, duration, deadline);
                 jobs.add(j);
             }
-        
 
-        if (jobs.isEmpty()) {
-            outputArea.setText("No client jobs found in the selected file");
-            return;
-        }
-
-        // Sort by arrival time for FCFS order
-        jobs.sort(Comparator.comparing(Job::getArrivalTime));
-
-        
-        for (Job j : jobs){
-            vc.assignJob(j);
-        } 
-        LocalDateTime start = LocalDateTime.now();
-        String report = vc.completion();
-
-        outputArea.setText("==== Starting at" + start + "====\n" + report);
-           
-            }catch (Exception e){
-                outputArea.setText("Error: " + e.getMessage());
-                e.printStackTrace();
+            if (jobs.isEmpty()) {
+                outputArea.setText("No client jobs found in the selected file");
+                return;
             }
-        }
-       
 
+            jobs.sort(Comparator.comparing(Job::getArrivalTime));
+
+            for (Job j : jobs){
+                vc.assignJob(j);
+            } 
+            LocalDateTime start = LocalDateTime.now();
+            String report = vc.completion();
+
+            outputArea.setText("==== Starting at" + start + "====\n" + report);
+           
+        } catch (Exception e){
+            outputArea.setText("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     // Gianna: go back home
     private void goHome() {
