@@ -1,3 +1,8 @@
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
+
 public class Owner extends User {
     private String vehicleID;
     private String vehicleModel;
@@ -24,7 +29,7 @@ public class Owner extends User {
     public String getArrivalTime()  { return arrivalTime; }
     public String getDepartureTime(){ return departureTime; }
 
-   
+    @Override
     public String fileText() {
         return "Owner ID: " + ID +
                " | Timestamp: " + time +
@@ -35,5 +40,34 @@ public class Owner extends User {
                " | Arrival Time: " + arrivalTime +
                " | Departure Time: " + departureTime;
     }
+
+    // SOCKET METHOD 
+    public String sendVehicleInfo(String host, int port) {
+        try (Socket socket = new Socket(host, port);
+             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+             DataInputStream dis = new DataInputStream(socket.getInputStream())) {
+
+            String data = fileText();
+
+            // send data
+            dos.writeUTF(data);
+            dos.flush();
+
+            // receive response
+            String message = dis.readUTF();
+            System.out.println("Message: " + message);
+
+            String result = dis.readUTF();
+            System.out.println("Result: " + result);
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERROR";
+        }
+    } 
+
+
 }
 
